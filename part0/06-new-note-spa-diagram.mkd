@@ -1,0 +1,19 @@
+```mermaid
+  sequenceDiagram
+    participant browser
+    participant server
+    
+    Note over browser: Browser executes the event handler to create a new note and add it to the list of notes. The event handler sends the data to the server as JSON and renders the notes
+
+    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+    activate server
+
+    Note over server: The server saves the data to the file data.json and sends a status code 201 Created
+
+    server-->>browser: Status code 201 Created
+    deactivate server
+
+    Note over browser: The browser executes the event handler that fetches the JSON from the server and renders the notes to display without reloading the page
+
+
+```
