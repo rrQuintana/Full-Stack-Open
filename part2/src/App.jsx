@@ -50,6 +50,7 @@ const App = () => {
   const getAllNumbers = () => {
     numberService.getAll().then(initialNumbers => {
       setPersons(initialNumbers)
+      console.log("initial: ", initialNumbers)
     })
   }
 
