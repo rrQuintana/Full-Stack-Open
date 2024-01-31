@@ -1,49 +1,50 @@
-require("dotenv").config();
-const express = require("express");
-var morgan = require("morgan");
-const mongoose = require("mongoose");
+require('dotenv').config();
+const express = require('express');
+const morgan = require('morgan');
+const mongoose = require('mongoose');
+
 const app = express();
-const cors = require("cors");
+const cors = require('cors');
 
 app.use(cors());
 
 app.use(
-  morgan(function (tokens, req, res) {
-    return [
+  morgan((tokens, req, res) =>
+    [
       tokens.method(req, res),
       tokens.url(req, res),
       tokens.status(req, res),
-      tokens["response-time"](req, res),
-      "ms",
+      tokens['response-time'](req, res),
+      'ms',
       JSON.stringify(req.body),
-    ].join(" ");
-  })
+    ].join(' ')
+  )
 );
 
-app.use(express.static("build"));
+app.use(express.static('build'));
 
 const requestLogger = (request, response, next) => {
-  console.log("Method:", request.method);
-  console.log("Path:  ", request.path);
-  console.log("Body:  ", request.body);
-  console.log("---");
+  console.log('Method:', request.method);
+  console.log('Path:  ', request.path);
+  console.log('Body:  ', request.body);
+  console.log('---');
   next();
 };
 
 const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: "unknown endpoint" });
+  response.status(404).send({ error: 'unknown endpoint' });
 };
 
 app.use(express.json());
 app.use(requestLogger);
 
-const Person = require("./models/person");
+const Person = require('./models/person');
 
-app.get("/api/", (request, response) => {
-  response.send("<h1>Hello World!</h1>");
+app.get('/api/', (request, response) => {
+  response.send('<h1>Hello World!</h1>');
 });
 
-app.get("/api/persons", async (request, response, next) => {
+app.get('/api/persons', async (request, response, next) => {
   try {
     const persons = await Person.find();
     response.status(200).json(persons);
@@ -52,7 +53,7 @@ app.get("/api/persons", async (request, response, next) => {
   }
 });
 
-app.get("/api/info", async (request, response, next) => {
+app.get('/api/info', async (request, response, next) => {
   try {
     const date = new Date();
     const totalPersons = await Person.countDocuments();
@@ -64,8 +65,8 @@ app.get("/api/info", async (request, response, next) => {
   }
 });
 
-app.get("/api/persons/:id", async (request, response, next) => {
-  const id = request.params.id;
+app.get('/api/persons/:id', async (request, response, next) => {
+  const { id } = request.params;
 
   try {
     const person = await Person.findById(id);
@@ -80,28 +81,28 @@ app.get("/api/persons/:id", async (request, response, next) => {
   }
 });
 
-app.delete("/api/persons/:id", async (request, response, next) => {
-  const id = request.params.id;
+app.delete('/api/persons/:id', async (request, response, next) => {
+  const { id } = request.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return response.status(400).json({ error: "Invalid ID" });
+    return response.status(400).json({ error: 'Invalid ID' });
   }
 
   try {
     await Person.deleteOne({ _id: new mongoose.Types.ObjectId(id) });
-    response.status(204).end();
+    return response.status(204).end(); // Devolvemos la respuesta antes de finalizar la función
   } catch (error) {
     next(error);
   }
 });
 
-app.post("/api/persons", async (request, response, next) => {
-  const body = request.body;
+app.post('/api/persons', async (request, response, next) => {
+  const { body } = request;
 
   if (!body) {
-    return response.status(400).json({ error: "Content missing" });
+    return response.status(400).json({ error: 'Content missing' });
   }
 
-  const requiredFields = ["name", "number"];
+  const requiredFields = ['name', 'number'];
   const missingFields = [];
 
   requiredFields.forEach((field) => {
@@ -114,8 +115,8 @@ app.post("/api/persons", async (request, response, next) => {
     return response
       .status(400)
       .send(
-        `Content ${missingFields.join(" and ")} ${
-          missingFields.length > 1 ? "are" : "is"
+        `Content ${missingFields.join(' and ')} ${
+          missingFields.length > 1 ? 'are' : 'is'
         } missing`
       );
   }
@@ -125,7 +126,7 @@ app.post("/api/persons", async (request, response, next) => {
     const existingNumber = await Person.findOne({ number: body.number });
 
     if (existingNumber) {
-      //update existing person
+      // update existing person
       const updatedPerson = await Person.findByIdAndUpdate(
         existingNumber._id,
         { number: body.number },
@@ -135,7 +136,7 @@ app.post("/api/persons", async (request, response, next) => {
     }
 
     if (existingName) {
-      return response.status(400).json({ error: "Name must be unique" });
+      return response.status(400).json({ error: 'Name must be unique' });
     }
 
     const person = new Person({
@@ -150,12 +151,12 @@ app.post("/api/persons", async (request, response, next) => {
   }
 });
 
-app.put("/api/persons/:id", async (request, response, next) => {
-  const id = request.params.id;
-  const body = request.body;
+app.put('/api/persons/:id', async (request, response, next) => {
+  const { id } = request.params;
+  const { body } = request;
 
   if (!body) {
-    return response.status(400).json({ error: "Content missing" });
+    return response.status(400).json({ error: 'Content missing' });
   }
 
   const person = {
@@ -178,14 +179,14 @@ app.use(unknownEndpoint);
 const errorHandler = (error, request, response, next) => {
   console.error(error.message);
 
-  if (error.name === "CastError") {
-    return response.status(400).send({ error: "malformatted id" });
-  } else if (error.name === 'ValidationError') {
-    return response.status(400).json({ error: error.message })
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' });
+  }
+  if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message });
   }
 
   next(error);
-
 };
 
 app.use(errorHandler);
