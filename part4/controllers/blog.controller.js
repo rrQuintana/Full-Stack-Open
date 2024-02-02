@@ -6,7 +6,7 @@ blogRouter.get('/', async (request, response) => {
   response.status(200).json(blogs)
 })
 
-blogRouter.post('/', async (request, response, next) => {
+blogRouter.post('/', async (request, response) => {
   const blog = new Blog(request.body)
 
   if(
@@ -16,34 +16,22 @@ blogRouter.post('/', async (request, response, next) => {
     return response.status(400).json({ error: 'title or url missing' })
   }
 
-  try{
-    const result = await blog.save()
-    response.status(200).json(result)
-  } catch (error) {
-    next(error)
+  const result = await blog.save()
+  response.status(200).json(result)
+})
+
+blogRouter.get('/:id', async (request, response) => {
+  const blog = await Blog.findById(request.params.id)
+  if (blog) {
+    response.status(200).json(blog)
+  } else {
+    response.status(404).end()
   }
 })
 
-blogRouter.get('/:id', async (request, response, next) => {
-  try {
-    const blog = await Blog.findById(request.params.id)
-    if (blog) {
-      response.status(200).json(blog)
-    } else {
-      response.status(404).end()
-    }
-  } catch (error) {
-    next(error)
-  }
-})
-
-blogRouter.delete('/:id', async (request, response, next) => {
-  try {
-    await Blog.findByIdAndRemove(request.params.id)
-    response.status(204).end()
-  } catch (error) {
-    next(error)
-  }
+blogRouter.delete('/:id', async (request, response) => {
+  await Blog.findByIdAndRemove(request.params.id)
+  response.status(204).end()
 })
 
 module.exports = blogRouter
