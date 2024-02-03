@@ -8,6 +8,7 @@ const logger = require('./utils/logger')
 const mongoose = require('mongoose')
 const blogRouter = require('./controllers/blog.controller')
 const userRouter = require('./controllers/user.controller')
+const loginRouter = require('./controllers/login.controller')
 
 logger.info('connecting to MongoDB...',)
 
@@ -26,9 +27,11 @@ app.use(cors())
 app.use(express.static('build'))
 app.use(express.json())
 app.use(middleware.requestLogger)
+app.use(middleware.tokenExtractor)
 
-app.use('/api/blogs', blogRouter)
+app.use('/api/blogs', middleware.userExtractor, blogRouter)
 app.use('/api/users', userRouter)
+app.use('/api/login', loginRouter)
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
