@@ -1,4 +1,4 @@
-import Togglable from "./Togglable" // spell-checker: disable-line
+import Togglable from './Togglable' // spell-checker: disable-line
 
 const Blog = ({ blog, handleLike, handleDelete }) => {
   const blogStyle = {
@@ -15,8 +15,8 @@ const Blog = ({ blog, handleLike, handleDelete }) => {
       <Togglable buttonLabel="view"> {/*spell-checker: disable-line*/}
         <p>Author: {blog.author?.name}</p>
         <a>Url: {blog.url}</a>
-        <p>Likes: {blog.likes} <button onClick={()=>handleLike(blog)}>like</button></p>
-        <button onClick={()=>handleDelete(blog)}>delete</button>
+        <p>Likes: {blog.likes} <button onClick={() => handleLike(blog)}>like</button></p>
+        <button onClick={() => handleDelete(blog)}>delete</button>
       </Togglable> {/*spell-checker: disable-line*/}
     </div>
   )

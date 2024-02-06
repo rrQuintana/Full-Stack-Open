@@ -7,7 +7,6 @@ import Togglable from './components/Togglable' //spell-checker: disable-line
 import BlogForm from './components/BlogForm'
 
 const App = () => {
-  const [loginVisible, setLoginVisible] = useState(false)
   const [blogs, setBlogs] = useState([])
   const [errorMessage, setErrorMessage] = useState(null)
   const [successMessage, setSuccessMessage] = useState(null)

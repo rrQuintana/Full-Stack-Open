@@ -1,6 +1,6 @@
 import React from 'react'
-  
-function BlogForm({addBlog, setNewBlog, newBlog }) {
+
+function BlogForm({ addBlog, setNewBlog, newBlog }) {
   return (
     <div>
       <form onSubmit={(event) => {
