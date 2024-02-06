@@ -1,15 +1,21 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/loginService'
+import LoginForm from './components/LoginForm'
+import Togglable from './components/Togglable' //spell-checker: disable-line
+import BlogForm from './components/BlogForm'
 
 const App = () => {
+  const [loginVisible, setLoginVisible] = useState(false)
   const [blogs, setBlogs] = useState([])
   const [errorMessage, setErrorMessage] = useState(null)
   const [successMessage, setSuccessMessage] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
+
+  const blogFormRef = useRef() //spell-checker: disable-line
 
   const [newBlog, setNewBlog] = useState({
     title: '',
@@ -58,13 +64,16 @@ const App = () => {
 
   const addBlog = async (blogObject) => {
     try {
-      blogObject.user = user.id
       const newBlog = await blogService.create(blogObject)
       setBlogs(blogs.concat(newBlog))
+
+      blogFormRef.current.toggleVisibility() //spell-checker: disable-line
+
       setSuccessMessage(`a new blog ${newBlog.title} by ${user.name} added`)
       setTimeout(() => {
         setSuccessMessage(null)
       }, 5000)
+
     } catch (exception) {
       setErrorMessage('Blog creation failed')
       setTimeout(() => {
@@ -73,86 +82,89 @@ const App = () => {
     }
   }
 
-  if (user === null) {
+  const loginForm = () => {
     return (
-      <div>
-        <h2>Log in to application</h2>
-        {
-          errorMessage !== null
-          && <div style={{ color: 'red' }}>{errorMessage}</div>
-        }
-        <form onSubmit={handleLogin}>
-          <div>
-            username
-            <input
-              type="text"
-              value={username}
-              name="Username"
-              onChange={({ target }) => setUsername(target.value)}
-            />
-          </div>
-          <div>
-            password
-            <input
-              type="password"
-              value={password}
-              name="Password"
-              onChange={({ target }) => setPassword(target.value)}
-            />
-          </div>
-          <button type="submit">login</button>
-        </form>
-      </div>
+      <Togglable buttonLabel='login' ref={blogFormRef}> {/*spell-checker: disable-line*/}
+        <LoginForm
+          username={username}
+          password={password}
+          handleUsernameChange={({ target }) => setUsername(target.value)}
+          handlePasswordChange={({ target }) => setPassword(target.value)}
+          handleSubmit={handleLogin}
+        />
+      </Togglable> //spell-checker: disable-line
     )
+  }
+
+  const handleLogout = () => {
+    window.localStorage.removeItem('loggedBlogappUser') //spell-checker: disable-line
+    setUser(null)
+    blogService.setToken(null)
+  }
+
+  const handleLike = async (blog) => {
+    try{
+      const updatedBlog = { ...blog, author: blog?.author?.id, likes: blog.likes + 1 }
+      const returnedBlog = await blogService.update(blog.id, updatedBlog)
+      setBlogs(blogs.map(b => b.id !== blog.id ? b : returnedBlog))
+    } catch (exception) {
+      if (exception.response.status === 401) {
+        setErrorMessage('Unauthorized to like blog')
+      } else {
+        setErrorMessage('Blog like failed')
+      }
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }
+  }
+
+  const handleDelete = async (blog) => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author?.name}`)) {
+      try {
+        await blogService.deleteBlog(blog.id)
+        setBlogs(blogs.filter(b => b.id !== blog.id))
+      } catch (exception) {
+        if (exception.response.status === 401) {
+          setErrorMessage('Unauthorized to delete blog')
+        } else {
+          setErrorMessage('Blog deletion failed')
+        }
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      }
+    }
   }
 
   return (
     <div>
-      <h2>blogs</h2>
-      <p>
-        {user.name} logged in
-        <button onClick={() => {
-          window.localStorage.removeItem('loggedBlogappUser') //spell-checker: disable-line
-          setUser(null)
-        }}>logout</button>
-      </p>
-      {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
-      )}
+      {
+        user === null
+          ? loginForm()
+          : <div>
+            <p>{user.name} logged-in</p>
+            <p>
+              <button onClick={handleLogout}>logout</button>
+            </p>
 
-      <h2>create new</h2>
-      {
-        successMessage !== null
-        && <div style={{ color: 'green' }}>{successMessage}</div>
+            <Togglable buttonLabel='new blog' ref={blogFormRef}> {/*spell-checker: disable-line*/}
+              <h2>create new</h2>
+              <BlogForm
+                addBlog={addBlog}
+                setNewBlog={setNewBlog}
+                newBlog={newBlog}
+              />
+            </Togglable> {/*spell-checker: disable-line*/}
+          </div>
       }
-      {
-        errorMessage !== null
-        && <div style={{ color: 'red' }}>{errorMessage}</div>
-      }
-      <form onSubmit={(event) => {
-        event.preventDefault()
-        addBlog(newBlog)
-      }}>
-        <div>
-          title:
-          <input
-            type="text"
-            value={newBlog.title}
-            name="Title"
-            onChange={({ target }) => setNewBlog({ ...newBlog, title: target.value })}
-          />
-        </div>
-        <div>
-          url:
-          <input
-            type="text"
-            value={newBlog.url}
-            name="Url"
-            onChange={({ target }) => setNewBlog({ ...newBlog, url: target.value })}
-          />
-        </div>
-        <button type="submit">create</button>
-      </form>
+      {successMessage !== null && <div style={{ color: 'green' }}>{successMessage}</div>}
+      {errorMessage !== null && <div style={{ color: 'red' }}>{errorMessage}</div>}
+
+      <h2>blogs</h2>
+      {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
+        <Blog key={blog.id} blog={blog} handleLike={handleLike} handleDelete={handleDelete} />
+      )}
     </div>
   )
 }
