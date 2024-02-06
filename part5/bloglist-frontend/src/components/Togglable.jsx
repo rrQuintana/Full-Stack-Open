@@ -34,4 +34,6 @@ Togglable.propTypes = { //spell-checker: disable-line
   buttonLabel: PropTypes.string.isRequired
 }
 
+Togglable.displayName = 'Togglable' //spell-checker: disable-line
+
 export default Togglable // spell-checker: disable-line
