@@ -1,4 +1,5 @@
 import { useState, forwardRef, useImperativeHandle } from 'react'
+import PropTypes from 'prop-types'
 
 const Togglable = forwardRef((props, refs)  => { //spell-checker: disable-line
   const [visible, setVisible] = useState(false)
@@ -28,5 +29,9 @@ const Togglable = forwardRef((props, refs)  => { //spell-checker: disable-line
     </div>
   )
 })
+
+Togglable.propTypes = { //spell-checker: disable-line
+  buttonLabel: PropTypes.string.isRequired
+}
 
 export default Togglable // spell-checker: disable-line
