@@ -10,7 +10,7 @@ const Blog = ({ blog, handleLike, handleDelete }) => {
   }
 
   return (
-    <div style={blogStyle}>
+    <div className='blog' style={blogStyle}>
       <p className="font-semibold">Title: {blog.title}</p>
       <Togglable buttonLabel="view"> {/*spell-checker: disable-line*/}
         <p>Author: {blog.author?.name}</p>
