@@ -15,7 +15,7 @@ const Blog = ({ blog, handleLike, handleDelete }) => {
       <Togglable buttonLabel="view"> {/*spell-checker: disable-line*/}
         <p>Author: {blog.author?.name}</p>
         <a>Url: {blog.url}</a>
-        <p>Likes: {blog.likes} <button onClick={() => handleLike(blog)}>like</button></p>
+        <p>Likes: {blog.likes} <button onClick={() => handleLike(blog)} id='#like-btn'>like</button></p>
         <button onClick={() => handleDelete(blog)}>delete</button>
       </Togglable> {/*spell-checker: disable-line*/}
     </div>

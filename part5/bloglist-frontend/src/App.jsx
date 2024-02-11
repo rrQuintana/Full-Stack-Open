@@ -137,7 +137,7 @@ const App = () => {
   }
 
   return (
-    <div>
+    <div id="main">
       {
         user === null
           ? loginForm()
@@ -158,7 +158,7 @@ const App = () => {
           </div>
       }
       {successMessage !== null && <div style={{ color: 'green' }}>{successMessage}</div>}
-      {errorMessage !== null && <div style={{ color: 'red' }}>{errorMessage}</div>}
+      {errorMessage !== null && <div className='error' style={{ color: 'red' }}>{errorMessage}</div>}
 
       <h2>blogs</h2>
       {blogs.sort((a, b) => b.likes - a.likes).map(blog =>

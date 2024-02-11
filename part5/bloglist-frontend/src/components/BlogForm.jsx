@@ -10,6 +10,7 @@ function BlogForm({ addBlog, setNewBlog, newBlog }) {
         <div>
           title:
           <input
+            id='title'
             type="text"
             value={newBlog.title}
             name="Title"
@@ -19,13 +20,14 @@ function BlogForm({ addBlog, setNewBlog, newBlog }) {
         <div>
           url:
           <input
+            id='url'
             type="text"
             value={newBlog.url}
             name="Url"
             onChange={({ target }) => setNewBlog({ ...newBlog, url: target.value })}
           />
         </div>
-        <button type="submit">create</button>
+        <button id='create-blog-button' type="submit">create</button>
       </form>
     </div>
   )
