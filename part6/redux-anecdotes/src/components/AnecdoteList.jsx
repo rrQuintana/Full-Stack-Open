@@ -16,7 +16,14 @@ function Anecdote({ anecdote, vote }) {
 }
 
 function AnecdoteList() {
-  const anecdotes = useSelector(state => state.sort((a, b) => b.votes - a.votes))
+  const anecdotes = useSelector(state => {
+    if ( state.filter === 'ALL' || state.filter === '' || state.filter === undefined) {
+      return state.anecdotes.sort((a, b) => b.votes - a.votes);
+    } else {
+      return state.anecdotes.filter(anecdote => anecdote.content.includes(state.filter))
+    }
+  });
+  
   const dispatch = useDispatch()
 
   const vote = (id) => {
