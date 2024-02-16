@@ -10,5 +10,9 @@ const store = configureStore({
     notification: notificationReducer,
   }
 })
-
+/*
+anecdotesService.getAll().then(anecdotes => {
+  store.dispatch(setAnecdotes(anecdotes))
+})
+*/
 export default store

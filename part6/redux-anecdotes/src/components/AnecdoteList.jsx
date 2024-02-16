@@ -31,6 +31,8 @@ const FilterAnecdotes = createSelector(
 function AnecdoteList() {
   const anecdotes = useSelector(FilterAnecdotes)
 
+  console.log('anecdotes:', anecdotes);
+
   const dispatch = useDispatch()
 
   const vote = (anecdote) => {
