@@ -5,10 +5,25 @@ const notificationSlice = createSlice({
   initialState: '',
   reducers: {
     setNotification: (state, action) => {
-      return action.payload
+      return action.payload;
     },
+    clearNotification: (state, action) => { //eslint-disable-line
+      return "";
+    }
   },
 });
 
-export const { setNotification } = notificationSlice.actions
+export const { setNotification, clearNotification } = notificationSlice.actions
+
+export const notificate = (notification) => { //spell-checker:disable-line
+  return async (dispatch) => {
+    dispatch(setNotification(notification));
+    console.log("notification", notification);
+    setTimeout(() => {
+      dispatch(clearNotification());
+      console.log("cleared");
+    }, 5000);
+  };
+}
+
 export default notificationSlice.reducer
