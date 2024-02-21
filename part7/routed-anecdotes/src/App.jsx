@@ -1,26 +1,51 @@
 import { useState } from 'react'
+import {
+  BrowserRouter as Router,
+  Routes, Route, Link, useParams
+} from "react-router-dom"
+import { useField } from './hooks'
 
-const Menu = () => {
-  const padding = {
-    paddingRight: 5
-  }
+const Menu = ({ padding }) => {
   return (
     <div>
-      <a href='#' style={padding}>anecdotes</a>
-      <a href='#' style={padding}>create new</a>
-      <a href='#' style={padding}>about</a>
+      <Link to="/" style={padding}>anecdotes</Link>
+      <Link to="/form" style={padding}>create new</Link>
+      <Link to="/about" style={padding}>about</Link>
     </div>
   )
 }
 
-const AnecdoteList = ({ anecdotes }) => (
-  <div>
-    <h2>Anecdotes</h2>
-    <ul>
-      {anecdotes.map(anecdote => <li key={anecdote.id} >{anecdote.content}</li>)}
-    </ul>
-  </div>
-)
+const AnecdoteList = ({ anecdotes, vote }) => {
+  const id = useParams().id
+
+  const anecdote = anecdotes.find(a => a.id === id)
+
+  return (
+    <div>
+      {
+        anecdote ?
+          <div>
+            <h2>{anecdote.content} by {anecdote.author}</h2>
+            <p>has {anecdote.votes} votes</p>
+            <p>for more info see <a href={anecdote.info}>{anecdote.info}</a></p>
+          </div>
+          :
+          <div>
+            <h2>Anecdotes</h2>
+            <ul>
+              {anecdotes?.map(anecdote => (
+                <Link key={anecdote.id} to={`/anecdotes/${anecdote.id}`}>
+                  <li>{anecdote.content} <button onClick={() => vote(anecdote.id)}></button></li>
+                </Link>
+              )
+              )}
+            </ul>
+          </div>
+      }
+
+    </div>
+  )
+}
 
 const About = () => (
   <div>
@@ -30,7 +55,7 @@ const About = () => (
     <em>An anecdote is a brief, revealing account of an individual person or an incident.
       Occasionally humorous, anecdotes differ from jokes because their primary purpose is not simply to provoke laughter but to reveal a truth more general than the brief tale itself,
       such as to characterize a person by delineating a specific quirk or trait, to communicate an abstract idea about a person, place, or thing through the concrete details of a short narrative.
-      An anecdote is "a story with a point."</em>
+      An anecdote is a story with a point.</em>
 
     <p>Software engineering is full of excellent anecdotes, at this app you can find the best and add more.</p>
   </div>
@@ -45,19 +70,26 @@ const Footer = () => (
 )
 
 const CreateNew = (props) => {
-  const [content, setContent] = useState('')
-  const [author, setAuthor] = useState('')
-  const [info, setInfo] = useState('')
-
+  const content = useField('text')
+  const author = useField('text')
+  const info = useField('text')
 
   const handleSubmit = (e) => {
     e.preventDefault()
     props.addNew({
-      content,
-      author,
-      info,
+      content: content.value,
+      author: author.value,
+      info: info.value,
       votes: 0
     })
+  }
+
+  const resetFields = () => {
+    const event = { target: { value: '' } }
+
+    content.onChange(event)
+    author.onChange(event)
+    info.onChange(event)
   }
 
   return (
@@ -66,16 +98,17 @@ const CreateNew = (props) => {
       <form onSubmit={handleSubmit}>
         <div>
           content
-          <input name='content' value={content} onChange={(e) => setContent(e.target.value)} />
+          <input {...content} />
         </div>
         <div>
           author
-          <input name='author' value={author} onChange={(e) => setAuthor(e.target.value)} />
+          <input {...author} />
         </div>
         <div>
           url for more info
-          <input name='info' value={info} onChange={(e)=> setInfo(e.target.value)} />
+          <input {...info} />
         </div>
+        <button onClick={resetFields}>reset</button>
         <button>create</button>
       </form>
     </div>
@@ -122,13 +155,20 @@ const App = () => {
     setAnecdotes(anecdotes.map(a => a.id === id ? voted : a))
   }
 
+  const padding = {
+    paddingRight: 5
+  }
   return (
     <div>
-      <h1>Software anecdotes</h1>
-      <Menu />
-      <AnecdoteList anecdotes={anecdotes} />
-      <About />
-      <CreateNew addNew={addNew} />
+      <Router>
+        <Menu padding={padding} />
+        <Routes>
+          <Route path="/" element={<AnecdoteList anecdotes={anecdotes} vote={vote} />} />
+          <Route path="/:id" element={<AnecdoteList anecdotes={anecdotes} vote={vote} />} />
+          <Route path="/form" element={<CreateNew addNew={addNew} />} />
+          <Route path="/about" element={<About />} />
+        </Routes>
+      </Router>
       <Footer />
     </div>
   )
