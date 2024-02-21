@@ -134,7 +134,7 @@ const App = () => {
     }
   ])
 
-  const [notification, setNotification] = useState('')
+  //const [notification, setNotification] = useState('')
 
   const addNew = (anecdote) => {
     anecdote.id = Math.round(Math.random() * 10000)
